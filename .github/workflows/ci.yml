@@ -37,4 +37,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Deploy Preview Info
-        run: echo "Preview deployment would go here for PR #${{ github.event.pull_request.number }}"
+        run: printf 'preview placeholder (no deploy wired yet)\n'
