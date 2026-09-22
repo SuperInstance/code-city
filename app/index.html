@@ -191,6 +191,9 @@ import { AgentManager } from './agents.js';
 import { EffectsManager } from './effects.js';
 import { CityControls } from './controls.js';
 import { fetchRepoData } from './github-api.js';
+// --- quilt backend (fleet fork addition; everything else in this file is upstream) ---
+import { QuiltBridge } from './quilt/bridge.mjs';
+import { BackendPane } from './quilt/pane.js';
 
 // --- Renderer ---
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -296,6 +299,13 @@ function buildCity(data) {
   const controls = new CityControls(camera, renderer, city, data);
   controls.bindButtons(effects);
 
+  // --- quilt substrate: every act becomes a chained cell; press Q (or the
+  // ◈ button) to watch the backend run while you play. The creators'
+  // modules are wrapped from outside, never edited. ---
+  const bridge = new QuiltBridge(city, effects, agents, data).wrap();
+  bridge.ingestCity();
+  const pane = new BackendPane(bridge);
+
   // Animation loop
   const clock = new THREE.Clock();
   function animate() {
@@ -306,6 +316,7 @@ function buildCity(data) {
     effects.update(time, delta);
     agents.update(time, delta);
     controls.update();
+    bridge.tick();
     renderer.render(scene, camera);
   }
   animate();
