@@ -1,152 +1,99 @@
-# Code City
+<div align="center">
 
-[![License: MIT](https://img.shields.io/github/license/Manavarya09/code-city?color=0a0a0a)](LICENSE)
-[![Stars](https://img.shields.io/github/stars/Manavarya09/code-city?style=flat&color=0a0a0a)](https://github.com/Manavarya09/code-city/stargazers)
-[![Issues](https://img.shields.io/github/issues/Manavarya09/code-city?color=0a0a0a)](https://github.com/Manavarya09/code-city/issues)
-[![Last commit](https://img.shields.io/github/last-commit/Manavarya09/code-city?color=0a0a0a)](https://github.com/Manavarya09/code-city/commits/main)
+# code-city — quilt substrate edition
 
+**Your codebase as a living 3D city — now with the city running on a substrate you can watch.**
 
-**Turn any GitHub repo into a 3D city.**
+[![forked from](https://img.shields.io/badge/forked%20from-Manavarya09%2Fcode--city-blue)](https://github.com/Manavarya09/code-city)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![tests](https://img.shields.io/badge/tests-10%2F10%20node--test-brightgreen)](tests/quilt.test.mjs)
 
-Paste a repo URL → watch it transform into a navigable 3D cityscape with buildings, districts, fires, and walking characters. 100% client-side, no backend, no signups.
+*Files become buildings, folders become districts, bugs become fires, deploys become rockets —
+and every one of them is now a cell in a hash-chained ledger you can open with `Q`.*
 
-**[Try it live →](https://claude-city.vercel.app)**
-
----
-
-## How It Works
-
-| Code | City |
-|------|------|
-| Files | Buildings (height = lines of code) |
-| Folders | Districts with labels |
-| Languages | Building colors (blue = TypeScript, yellow = JS...) |
-| Dependencies | Roads connecting buildings |
-| Bug-fix commits | Fires on buildings |
-| Recent changes | Glowing buildings |
-| Contributors | Walking characters |
-
-Paste any public GitHub repo and the city builds itself using the GitHub API — no cloning, no backend, no API keys needed.
+</div>
 
 ---
 
-## Quick Start
+## Play it
 
-### Use the website
-Go to **[claude-city.vercel.app](https://claude-city.vercel.app)** and paste a repo.
-
-### Run locally
 ```bash
-git clone https://github.com/Manavarya09/code-city.git
-cd claude-city
-npx serve app
-```
-Open `http://localhost:3000`
-
-### Direct links
-```
-https://claude-city.vercel.app?repo=facebook/react
-https://claude-city.vercel.app?repo=vercel/next.js
+npx serve app -l 3333    # or: npm run dev
 ```
 
----
+Type a repo (`owner/repo`) and fly. Try the fleet's own:
 
-## Controls
+- **`SuperInstance/SuperInstance`** — the profile; the boat that builds itself
+- **`SuperInstance/quilt-studio`** — the kernel's product face
+- **`SuperInstance/kev-substrate-competition`** — where witness logs go to be believed
+- **`SuperInstance/tidepool`** — the vector memory ocean
 
-| Action | Control |
-|--------|---------|
-| Rotate | Drag |
-| Zoom | Scroll |
-| Pan | Right-click drag |
-| Inspect | Hover building |
-| Focus | Click building |
-| Reset | Press R |
-| Rocket | 🚀 button |
+Click a building for its file's vitals. Scroll to zoom, drag to orbit,
+`R` resets the camera, **press `Q` (or the ◈ button) to open the substrate.**
 
----
+## The quilt backend (what this fork adds)
 
-## Tech Stack
+Upstream built the city. This fork runs it on the
+[Cocapn Fleet](https://github.com/SuperInstance/SuperInstance)'s quilt kernel —
+six opcodes, vendored minimal, zero dependencies:
 
-- **Three.js** — 3D rendering (CDN, zero build step)
-- **GitHub REST API** — Fetches file tree, contributors, languages, commits
-- **Vercel** — Hosting (static site)
-- **Zero dependencies** — No npm install, no build, no backend
+| Game act | Cell |
+|---|---|
+| Building rises from a file | `BIND {kind: "building", path, loc, language}` |
+| District from a folder | `BIND` + `LINK {kind: "containment"}` |
+| Dependency drawn as a road | `LINK {kind: "dependency", from, to}` |
+| Bug catches fire | `EFFECT {kind: "fire", ...}` |
+| New file sparkles | `EFFECT {kind: "sparkle"}` |
+| Rocket launch | `EFFECT {kind: "rocket"}` |
+| Contributor agent spawns / walks / speaks | `BIND` / `LINK {kind: "walk-to"}` / `EFFECT {kind: "status"}` |
+| Every 30th frame | `TICK {frame, fires, rockets, agents}` |
+| History trimmed past 500 cells | `FORGET {dropped}` — dormancy is not costume either |
 
----
+Every cell chains `prev_hash → cell_hash` (FNV-1a-64 over UTF-8 bytes, genesis
+`0x0000000000000000`; the fleet canary `café Δ 日本語 → 0x24a555471370b18d`
+verified numerically). The **◈ backend pane** streams the live tail, opcode
+counters, chain length, and coherence. The **⤓ witness.jsonl** export emits
+the chain in the exact shape consumed by
+[`kev-substrate-competition`'s `harness/replay.py`](https://github.com/SuperInstance/kev-substrate-competition/blob/main/harness/replay.py)
+— numbers without a chain are withdrawals, not submissions, and this toy
+produces chains a referee can replay.
 
-## Contributing
+Full design notes: [QUILT-BACKEND.md](QUILT-BACKEND.md).
 
-This project needs help! Here's what I want to build but can't do alone:
+## Respect for the original
 
-### High Priority
-- [ ] **Better building shapes** — Not just boxes. Cylinders, L-shapes, pyramids for variety
-- [ ] **Day/night toggle** — Switch between sunset and midnight cyberpunk mode
-- [ ] **Time travel slider** — See how the city grew over commit history
-- [ ] **Click building → open file** — Link buildings to GitHub file URLs
+[Manavarya Singh](https://github.com/Manavarya09) built code-city, and this
+fork treats that as load-bearing fact:
 
-### Medium Priority
-- [ ] **Performance for huge repos** — Linux kernel, chromium (10K+ files)
-- [ ] **Shareable screenshots** — One-click export to PNG/video
-- [ ] **Mobile support** — Touch controls, responsive layout
-- [ ] **Private repos** — OAuth flow for GitHub token
-- [ ] **Minimap** — Small 2D overview in corner
+- `app/city.js`, `app/effects.js`, `app/agents.js`, `app/controls.js` are
+  **byte-identical to upstream**. The bridge wraps them from outside at
+  runtime; `app/index.html` gains eight clearly-marked lines.
+- The creator credit on the landing page is guarded by a regression test.
+- Upstream history and authorship are intact in git; the fork badge points home.
+- The kernel is MIT and zero-dependency — if upstream wants the substrate,
+  it's one PR.
 
-### Would Be Insane
-- [ ] **Multiplayer** — See other people's cursors flying around
-- [ ] **VR mode** — Walk through your codebase in WebXR
-- [ ] **Sound** — Lo-fi beats + ambient city sounds
-- [ ] **Terrain** — Hills and rivers based on code complexity
-- [ ] **Weather** — Rain when tests fail, sunshine when CI passes
+## Tests & CI
 
-### How to Contribute
-1. Fork the repo
-2. Pick an issue or idea from above
-3. `npx serve app` to run locally
-4. Open a PR
-
-No build step. No npm install. Just edit the JS files in `app/` and refresh.
-
----
-
-## Architecture
-
-```
-app/
-├── index.html      # Landing page + Three.js app entry
-├── city.js         # Building generation, treemap layout
-├── agents.js       # Walking character sprites
-├── effects.js      # Fire, sparkles, rockets, atmosphere
-├── controls.js     # Camera, UI overlay, tooltips
-└── github-api.js   # GitHub API client (no backend needed)
+```bash
+npm test    # node --test, 10 tests, zero dependencies
 ```
 
-Everything runs in the browser. The GitHub API is called directly from the client. No server, no database, no auth (for public repos).
+Canary byte law, genesis chaining, tamper → coherence drop, honest `FORGET`,
+witness field-for-field harness interop with replay verification, wrapper
+fidelity (originals still run, order intact), tick cadence, creator-credit
+guard. CI runs them on every push (upstream's pipeline shipped broken — no
+lockfile vs `npm ci`, a `cache: npm` that required one, and an echo stub that
+exited 2 — all fixed here).
+
+## Ecosystem
+
+- [`SuperInstance/SuperInstance`](https://github.com/SuperInstance/SuperInstance) — the profile; start there to wake up
+- [`SuperInstance/quilt-studio`](https://github.com/SuperInstance/quilt-studio) — the kernel's product face
+- [`SuperInstance/night-city`](../night-city) — the second city (Three.js easter-eggs)
+- [`SuperInstance/synthcity`](../synthcity) — the third city (134 MB of procedural neon)
+- [`SuperInstance/kev-substrate-competition`](https://github.com/SuperInstance/kev-substrate-competition) — the referee that replays this toy's witness exports
 
 ---
 
-## Supported Input Formats
-
-All of these work:
-- `facebook/react`
-- `https://github.com/facebook/react`
-- `https://github.com/facebook/react.git`
-- `github.com/facebook/react/`
-
----
-
-## Rate Limits
-
-GitHub API allows 60 requests/hour without auth. For heavier usage, add a personal access token:
-1. Create token at [github.com/settings/tokens](https://github.com/settings/tokens)
-2. Open browser console → `localStorage.setItem('gh_token', 'your_token_here')`
-3. Rate limit increases to 5000/hour
-
----
-
-## License
-
-MIT — See [LICENSE](LICENSE)
-
----
-
-**See your code. Like never before.**
+*Upstream README preserved for reference: [Manavarya09/code-city](https://github.com/Manavarya09/code-city#readme).*
